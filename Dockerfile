@@ -2,11 +2,22 @@
 FROM php:8.2-cli
 
 # 2. Install system dependencies and PHP extensions
+# RUN apt-get update && \
+#     DEBIAN_FRONTEND=noninteractive apt-get install -y \
+#         unzip \
+#         libzip-dev \
+#         libxml2-dev \
+#         git \
+#     && docker-php-ext-configure zip \
+#     && docker-php-ext-install zip pdo_mysql xml mbstring \
+#     && apt-get clean \
+#     && rm -rf /var/lib/apt/lists/*
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         unzip \
         libzip-dev \
         libxml2-dev \
+        libonig-dev \
         git \
     && docker-php-ext-configure zip \
     && docker-php-ext-install zip pdo_mysql xml mbstring \
