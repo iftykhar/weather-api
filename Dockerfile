@@ -2,14 +2,17 @@
 FROM php:8.2-cli
 
 # 2. Install system dependencies and PHP extensions
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         unzip \
         libzip-dev \
         libxml2-dev && \
-    docker-php-ext-install zip pdo_mysql xml mbstring && \
+    pecl install zip && \
+    docker-php-ext-install pdo_mysql xml mbstring && \
+    docker-php-ext-enable zip && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
 # 3. Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
