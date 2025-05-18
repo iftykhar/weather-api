@@ -23,12 +23,16 @@ WORKDIR /app
 # 5. Copy all code first
 COPY . .
 
-# 6. Install dependencies
+# 6. Copy .env.example to .env
+RUN cp .env.example .env
+
+# 7. Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# 7. Generate key & cache config
-RUN php artisan key:generate && php artisan config:cache
+# 8. Generate key & cache config
+RUN php artisan key:generate --force && \
+    php artisan config:cache
 
-# 8. Expose port & start server
+# 9. Expose port & start server
 EXPOSE 8000
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
