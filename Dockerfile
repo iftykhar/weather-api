@@ -1,31 +1,37 @@
-# 1. Use official PHP CLI image with necessary extensions
+# 1. Start from PHP CLI with common build tools
 FROM php:8.2-cli
 
-# 2. Install system dependencies and PHP extensions
+# 2. Install system packages and PHP extensions Laravel needs
 RUN apt-get update && apt-get install -y \
-      libzip-dev \
-      unzip \
-    && docker-php-ext-install zip pdo_mysql
+      unzip \                              # for Composer archive extraction :contentReference[oaicite:0]{index=0}
+      libzip-dev \                         # for zip PHP extension
+      libxml2-dev \                        # for xml PHP extension
+    && docker-php-ext-install \
+      zip \                                # ext-zip
+      pdo_mysql \                          # ext-pdo_mysql
+      xml \                                # ext-xml
+      mbstring                             # ext-mbstring
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 3. Install Composer globally (copy from Composer’s official image)
+# 3. Ensure Composer binary is available
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4. Set working directory inside container
+# 4. Set work directory
 WORKDIR /app
 
-# 5. Copy composer files and install PHP dependencies
+# 5. Copy only PHP dependency manifests first (leverage build cache)
 COPY composer.json composer.lock ./
+
+# 6. Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# 6. Copy the rest of the application code
+# 7. Copy all application code
 COPY . .
 
-# 7. Generate app key and cache config
+# 8. Generate Laravel key & cache config
 RUN php artisan key:generate \
-    && php artisan config:cache
+  && php artisan config:cache
 
-# 8. Expose the port your app runs on
+# 9. Expose port and define entrypoint
 EXPOSE 8000
-
-# 9. Define the command to run your app
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
