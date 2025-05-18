@@ -1,17 +1,25 @@
-# 1. Start from PHP CLI with common build tools
+# 1. Start from PHP CLI base image
 FROM php:8.2-cli
 
-# 2. Install system packages and PHP extensions Laravel needs
+# 2. Install required system packages and PHP extensions
 RUN apt-get update && apt-get install -y \
-      unzip \                              # for Composer archive extraction :contentReference[oaicite:0]{index=0}
-      libzip-dev \                         # for zip PHP extension
-      libxml2-dev \                        # for xml PHP extension
+    unzip \
+    libzip-dev \
+    libxml2-dev \
     && docker-php-ext-install \
-      zip \                                # ext-zip
-      pdo_mysql \                          # ext-pdo_mysql
-      xml \                                # ext-xml
-      mbstring                             # ext-mbstring
+    zip \
+    pdo_mysql \
+    xml \
+    mbstring \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+# 2.1 Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer \
+    && chmod +x /usr/bin/composer
+# 2.2 Install Node.js and npm
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest
+    
 
 # 3. Ensure Composer binary is available
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
