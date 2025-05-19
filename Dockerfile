@@ -31,7 +31,8 @@ RUN composer install --no-dev --optimize-autoloader
 
 # 8. Generate key & cache config
 RUN php artisan key:generate --force && \
-    php artisan config:cache
+    php artisan config:cache && \
+    php artisan migrate --force
 
 # 9. Expose port & start server
 EXPOSE 8000
